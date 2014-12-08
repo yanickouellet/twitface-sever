@@ -248,7 +248,7 @@ class DemandeAmiHandler(webapp2.RequestHandler):
             self.error(500)
 
 
-class AmiHandler(webapp2.RequestHandler):  # TODO
+class AmiHandler(webapp2.RequestHandler):
     def get(self, mem_no):
         try:
             cle_mem = ndb.Key('Membre', int(mem_no))
@@ -256,27 +256,13 @@ class AmiHandler(webapp2.RequestHandler):  # TODO
                 self.error(404)
                 return
 
+            requete = Ami.query().filter(ndb.OR(Ami.noAmi1 == cle_mem.id(),
+                                                Ami.noAmi2 == cle_mem.id()))
+
             list_amis = []
-            list_amis_1 = []
-            list_amis_2 = []
-
-            requete1 = Ami.query()
-            requete1 = requete1.filter(Ami.noAmi1 == int(mem_no))
-            for ami in requete1:
-                list_amis_1.append(ami.key)
-            requete2 = Ami.query()
-            requete1 = requete2.filter(Ami.noAmi2 == int(mem_no))
-            for ami in requete2:
-                list_amis_2.append(ami.key)
-
-            for ami in Membre.query().filter(list_amis_1).fetch():
+            for ami in requete.fetch():
                 ami_dict = ami.to_dict()
-                ami_dict['parent-id'] = cle_mem.id()
-                list_amis.append(ami_dict)
-
-            for ami in Membre.query().filter(list_amis_1.IN(mem_no)).fetch():
-                ami_dict = ami.to_dict()
-                ami_dict['parent-id'] = cle_mem.id()
+                ami_dict["no"] = ami.key.id()
                 list_amis.append(ami_dict)
 
             json_data = json.dumps(list_amis, default=serialiser_pour_json)
