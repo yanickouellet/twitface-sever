@@ -8,19 +8,8 @@ import datetime
 
 from google.appengine.ext import ndb
 from google.appengine.ext import db
-from models import Membre, Publication, DemandeAmi, Ami
-from data_reset_handler import *
-from publication_handler import *
-from membre_handler import *
-from demande_ami_handler import *
-from ami_handler import *
-
-
-class MainPageHandler(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain; charset=utf-8'
-        self.response.out.write('TP5 - Maxime Trottier et Yanick Ouellet')
-
+from models import Ami
+from utils import serialiser_pour_json
 
 class AmiHandler(webapp2.RequestHandler):
     def get(self, mem_no):
@@ -30,8 +19,8 @@ class AmiHandler(webapp2.RequestHandler):
                 self.error(404)
                 return
 
-            requete = Ami.query().filter(ndb.OR(Ami.noAmi1 == cle_mem.id(),
-                                                Ami.noAmi2 == cle_mem.id()))
+            requete = Ami.query().filter(ndb.OR(Ami.noAmi1 == cle_mem,
+                                                Ami.noAmi2 == cle_mem))
 
             list_amis = []
             for ami in requete.fetch():
@@ -100,23 +89,3 @@ class AmiHandler(webapp2.RequestHandler):
         except Exception:
             logging.error("%s", traceback.format_exc())
             self.error(500)
-
-
-app = webapp2.WSGIApplication(
-    [
-        webapp2.Route(r'/', handler=MainPageHandler, methods=['GET']),
-        webapp2.Route(r'/publications', handler=PublicationHandler,
-                      methods=['POST']),
-        webapp2.Route(r'/publications/<pub_no>', handler=PublicationHandler,
-                      methods=['GET', 'PUT', 'DELETE']),
-        webapp2.Route(r'/membres', handler=MembreHandler, methods=['GET']),
-        webapp2.Route(r'/membres/<mem_no>/amis',
-                      handler=AmiHandler, methods=['GET', 'POST']),
-        webapp2.Route(r'/membres/<mem_no>/demandes_amis',
-                      handler=DemandeAmiHandler, methods=['GET']),
-        webapp2.Route(r'/membres/<mem_no>/demandes_amis/<dem_ami_no>',
-                      handler=DemandeAmiHandler, methods=['DELETE']),
-        webapp2.Route(r'/data/reset', handler=DataResetHandler,
-                      methods=['POST']),
-    ],
-    debug=True)

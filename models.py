@@ -4,8 +4,8 @@ from google.appengine.ext import ndb
 
 
 class Ami(ndb.Model):
-    noAmi1 = ndb.IntegerProperty(required=True)
-    noAmi2 = ndb.IntegerProperty(required=True)
+    noAmi1 = ndb.KeyProperty(kind='Membre', required=True)
+    noAmi2 = ndb.KeyProperty(kind='Membre', required=True)
     dateAmite = ndb.DateProperty(required=True)
 
 
